@@ -2,7 +2,7 @@
 
 class  Cohete {
 
-   constructor(w,h,posicion_inicial ){
+   constructor(w,h,posicion_inicial){
 
      this.camino = []
      this.inc_w = 0
@@ -10,10 +10,10 @@ class  Cohete {
      this.inicializarCamino(w,h)
      this.w = w
      this.h = h
-     this.posicion = posicion_inicial
+     this.posicion = posicion_inicial.copy()
      this.velocidad = createVector(1,1)
      this.velocidad_deseada
-     this.vMax = 10
+     this.vMax = 4
      this.acelarecion = createVector(0,0)
      this.ruta = []
      this.ruta.push(this.posicion.copy())
@@ -23,8 +23,8 @@ class  Cohete {
 
    inicializarCamino(width,height){
 
-     var inc_w = width/25
-     var inc_h = height/25
+     var inc_w = width/10
+     var inc_h = height/10
      var camino = []
 
      for(var x = 0 ; x < width ; x += inc_w){
@@ -32,7 +32,8 @@ class  Cohete {
         var columna = []
 
         for(var y = 0 ; y < height ; y += inc_h ){
-          columna.push( p5.Vector.random2D() )
+          var r = p5.Vector.random2D()
+          columna.push( r )
        }
        camino.push(columna)
      }
@@ -106,10 +107,10 @@ class  Cohete {
      strokeWeight(1);
      push()
        translate(this.posicion.x,this.posicion.y)
+       rotate(this.velocidad.heading())
        fill(255)
        rectMode(CENTER)
-       rotate(this.velocidad.heading())
-       rect(0,0,10,5)
+       rect(0,0,6,3)
      pop()
 
 
@@ -117,34 +118,49 @@ class  Cohete {
 
    velocidadDeseada(){
 
+
       var x = Math.floor(this.posicion.x / this.inc_w)
       var y = Math.floor(this.posicion.y / this.inc_h)
 
       var v_campo = this.camino[x][y].copy()
       //this.aplicarFuerza(v_campo)
+
       this.velocidad_deseada = v_campo
 
    }
 
    diriguir(){
 
+      if(!this.choque){
       this.velocidadDeseada()
+      }else{
+      this.velocidad_deseada = createVector(0,0)
+      }
       var f_d = p5.Vector.sub(this.velocidad_deseada.copy().mult(this.vMax), this.velocidad.copy() );
       f_d.normalize()
-      this.aplicarFuerza(f_d.limit(7))
+      this.aplicarFuerza(f_d.limit(0.1))
 
 
    }
 
    colision(obstaculos){
+     var choque_pared_x = this.posicion.x > this.w -8 || this.posicion.x < 0+8
+     var choque_pared_y = this.posicion.y > this.h -8 || this.posicion.y < 0+8
      for(var i = 0 ; i < obstaculos.length ; i++){
         var obs =  obstaculos[i]
-        var choque_pared_x = this.posicion.x > this.w -5 || this.posicion.x < 0+5
-        var choque_pared_y = this.posicion.y > this.h -5 || this.posicion.y < 0+5
         if (obs.colision(this.posicion) || choque_pared_x || choque_pared_y){
             var choque = true
             return true
         }
+     }
+     return choque_pared_x || choque_pared_y
+
+
+   }
+
+   guardaCamino(){
+     if( frameCount%2 == 0 && !this.choque ){
+        this.ruta.push( this.posicion.copy() )
      }
 
    }
@@ -152,9 +168,7 @@ class  Cohete {
    verCamino(){
 
 
-      if( frameCount%2 == 0 && !this.choque ){
-         this.ruta.push( this.posicion.copy() )
-      }
+
       strokeWeight(2);
       stroke(237, 34, 93,200);
       beginShape(LINES);
