@@ -8,18 +8,23 @@ class  Cohete {
      this.inc_w = 0
      this.inc_h = 0
      this.inicializarCamino(w,h)
+     this.w = w
+     this.h = h
      this.posicion = posicion_inicial
      this.velocidad = createVector(1,1)
      this.velocidad_deseada
-     this.vMax = 5
+     this.vMax = 10
      this.acelarecion = createVector(0,0)
+     this.ruta = []
+     this.ruta.push(this.posicion.copy())
+     this.choque =  false
 
    }
 
    inicializarCamino(width,height){
 
-     var inc_w = width/20
-     var inc_h = height/20
+     var inc_w = width/25
+     var inc_h = height/25
      var camino = []
 
      for(var x = 0 ; x < width ; x += inc_w){
@@ -54,7 +59,7 @@ class  Cohete {
 
 }
 
-   verCamino(){
+   verCampo(){
 
      var n  = 8
      for(var x = 0 ; x < this.camino.length ; x ++){
@@ -81,11 +86,12 @@ class  Cohete {
 
    }
 
-   moverse(){
-
-     this.velocidad.add(this.acelarecion)
-     this.posicion.add(this.velocidad)
-     this.acelarecion.mult(0)
+   moverse(obs){
+     if (!this.colision(obs)){
+       this.velocidad.add(this.acelarecion)
+       this.posicion.add(this.velocidad)
+       this.acelarecion.mult(0)
+     }
 
    }
 
@@ -96,9 +102,11 @@ class  Cohete {
 
    verCohete(){
 
+     stroke(0)
+     strokeWeight(1);
      push()
        translate(this.posicion.x,this.posicion.y)
-       noFill()
+       fill(255)
        rectMode(CENTER)
        rotate(this.velocidad.heading())
        rect(0,0,10,5)
@@ -123,9 +131,44 @@ class  Cohete {
       this.velocidadDeseada()
       var f_d = p5.Vector.sub(this.velocidad_deseada.copy().mult(this.vMax), this.velocidad.copy() );
       f_d.normalize()
-      this.aplicarFuerza(f_d)
+      this.aplicarFuerza(f_d.limit(7))
 
 
    }
+
+   colision(obstaculos){
+     for(var i = 0 ; i < obstaculos.length ; i++){
+        var obs =  obstaculos[i]
+        var choque_pared_x = this.posicion.x > this.w -5 || this.posicion.x < 0+5
+        var choque_pared_y = this.posicion.y > this.h -5 || this.posicion.y < 0+5
+        if (obs.colision(this.posicion) || choque_pared_x || choque_pared_y){
+            var choque = true
+            return true
+        }
+     }
+
+   }
+
+   verCamino(){
+
+
+      if( frameCount%2 == 0 && !this.choque ){
+         this.ruta.push( this.posicion.copy() )
+      }
+      strokeWeight(2);
+      stroke(237, 34, 93,200);
+      beginShape(LINES);
+
+      for(var i = 1 ; i < this.ruta.length ; i++ ){
+
+          vertex(this.ruta[i-1].x,this.ruta[i-1].y);
+          vertex(this.ruta[i].x,this.ruta[i].y);
+
+
+
+      }
+      endShape();
+   }
+
 
 }
