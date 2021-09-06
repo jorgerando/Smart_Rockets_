@@ -10,14 +10,20 @@ class  Cohete {
      this.inicializarCamino(w,h)
      this.w = w
      this.h = h
+     this.inicio =  posicion_inicial.copy()
      this.posicion = posicion_inicial.copy()
-     this.velocidad = createVector(1,1)
+     this.velocidad = createVector(random(-1,1),random(-1,1))
      this.velocidad_deseada
      this.vMax = 4
      this.acelarecion = createVector(0,0)
      this.ruta = []
      this.ruta.push(this.posicion.copy())
      this.choque =  false
+     this.teminar = false
+     this.distanciaRecord = 1000000
+     this.fitnes = 0
+     this.tiempoLlegar = 100000
+     this.contador = 0
 
    }
 
@@ -87,11 +93,14 @@ class  Cohete {
 
    }
 
-   moverse(obs){
+   moverse(obs,fin){
      if (!this.colision(obs)){
        this.velocidad.add(this.acelarecion)
        this.posicion.add(this.velocidad)
        this.acelarecion.mult(0)
+       this.contador++ ;
+       this.record(fin)
+       this.llegar(fin)
      }
 
    }
@@ -137,22 +146,22 @@ class  Cohete {
       this.velocidad_deseada = createVector(0,0)
       }
       var f_d = p5.Vector.sub(this.velocidad_deseada.copy().mult(this.vMax), this.velocidad.copy() );
-      f_d.normalize()
       this.aplicarFuerza(f_d.limit(0.1))
 
 
    }
 
    colision(obstaculos){
-     var choque_pared_x = this.posicion.x > this.w -8 || this.posicion.x < 0+8
-     var choque_pared_y = this.posicion.y > this.h -8 || this.posicion.y < 0+8
+     var choque_pared_x = this.posicion.x > this.w -5 || this.posicion.x < 0+5
+     var choque_pared_y = this.posicion.y > this.h -5 || this.posicion.y < 0+5
      for(var i = 0 ; i < obstaculos.length ; i++){
         var obs =  obstaculos[i]
         if (obs.colision(this.posicion) || choque_pared_x || choque_pared_y){
-            var choque = true
+            this.choque = true
             return true
         }
      }
+     this.choque = choque_pared_x || choque_pared_y
      return choque_pared_x || choque_pared_y
 
 
@@ -184,5 +193,88 @@ class  Cohete {
       endShape();
    }
 
+   record(fin){
+     var d = p5.Vector.sub(fin,this.posicion)
+     var mag = d.mag()
+     if (mag < this.distanciaRecord) {
+       this.distanciaRecord = mag
+     }
+   }
+
+   llegar(fin){
+
+     var tiempoLlegar_ = 0
+     var d = p5.Vector.sub(fin,this.posicion)
+     var mag = d.mag()
+     if (mag < 10 ) {
+       this.terminar = true
+
+     }else {
+       this.tiempoLlegar = this.contador
+
+
+     }
+
+   }
+
+   fit(){
+
+      var d = p5.Vector.sub(fin,this.posicion)
+      var d = d.mag()
+      var fit = 1/(d)
+      fit = pow(fit,2)
+
+      if( this.choque ){ fit= fit *0.1 }
+      if( this.terminar ){ fit=fit * 2 }
+
+      this.fitnes = fit
+      return fit
+
+    }
+
+   darCamino(camino_){
+     this.camino = camino_
+
+    }
+
+   reproduccion(padre,tasa){
+
+     var nuevoCamino = []
+
+     for(var x = 0 ; x < this.camino.length ; x ++){
+        var columna = []
+        for(var y = 0 ; y < this.camino[0].length ; y ++ ){
+          var r
+
+          if(x > this.w/2){
+            r = padre.camino[x][y]
+          }else{
+            r = this.camino[x][y]
+          }
+          columna.push( r )
+       }
+       nuevoCamino.push(columna)
+     }
+
+     var nuevo_Individuo = new Cohete(this.w,this.h,this.inicio)
+     nuevo_Individuo.darCamino(nuevoCamino)
+     nuevo_Individuo.mutar(tasa)
+     return nuevo_Individuo
+
+   }
+
+   mutar(tasa){
+     for(var x = 0 ; x < this.camino.length ; x ++){
+
+        for(var y = 0 ; y < this.camino[0].length ; y ++ ){
+            var r = Math.random()
+            if(r<tasa){
+              this.camino[x][y]= p5.Vector.random2D()
+
+            }
+        }
+      }
+
+   }
 
 }
