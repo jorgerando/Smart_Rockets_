@@ -14,3 +14,6 @@ Evolution : https://en.wikipedia.org/wiki/Natural_selection
 Nature of code Book : https://natureofcode.com/book/chapter-9-the-evolution-of-code
 
 Genetic Algorims : https://en.wikipedia.org/wiki/Genetic_algorithm 
+
+## Autor
+* Jorge Rando Hernández :part_alternation_mark: [@jorgerando](https://github.com/jorgerando)
