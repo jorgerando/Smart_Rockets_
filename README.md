@@ -7,6 +7,9 @@ The individuals that come closest to the goal at the end of time will be the fit
 ## Fast camera :video_camera: :
 <img src="https://user-images.githubusercontent.com/69701088/182138448-ea5fbcc9-00aa-42d0-97b7-cf61a23fade3.gif" width="400" height="500"/> 
 
+
+#### Play with the project here :  https://jorgerando.github.io/Smart_Rockets_/
+
 ## References :
 
 Evolution : https://en.wikipedia.org/wiki/Natural_selection
